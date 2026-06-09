@@ -1,26 +1,30 @@
+import 'dart:convert';
+
 import 'package:food_store/models/authorize/login.model.dart';
 import 'package:food_store/models/authorize/signup.model.dart';
 import 'package:food_store/services/https.service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthorizeService {
   final HttpService _httpService = HttpService();
   final String controller = 'Accounts';
 
-  constructor() {
-    
-  }
-  Future<bool> signup(AccountModel model) =>
-    _httpService.post<AccountModel, bool>(('$controller/signup-update'), model);
+  constructor() {}
+  Future<bool> signup(AccountModel model) => _httpService
+      .post<AccountModel, bool>(('$controller/signup-update'), model);
 
-  Future<AccountModel> login(LoginModel model) => 
-    _httpService.post<LoginModel, AccountModel>('$controller/login', model, returnType: AccountModel());
+  Future<AccountModel> login(LoginModel model) =>
+      _httpService.post<LoginModel, AccountModel>('$controller/login', model,
+          returnType: AccountModel());
 
-  Future<AccountModel> getById(String id) => 
-    _httpService.get<LoginModel, AccountModel>('$controller/get-by-id/$id', AccountModel());
-    
+  Future<AccountModel> getById(String id) =>
+      _httpService.get<LoginModel, AccountModel>(
+          '$controller/get-by-id/$id', AccountModel());
+
   Future<AccountModel> getByEmail(String email) async {
     try {
-      final response = await _httpService.dio.get('${_httpService.headerUrl}Accounts/get-by-email/$email');
+      final response = await _httpService.dio
+          .get('${_httpService.headerUrl}Accounts/get-by-email/$email');
       if (response.statusCode == 200 && response.data is Map) {
         // Map<String, Object> stringObjectMap = response.data.map(
         //   (key, value) {
@@ -40,5 +44,20 @@ class AuthorizeService {
     } catch (e) {
       throw Exception('Email không tồn tại: $e');
     }
+  }
+
+  Future<void> saveAccountInfo(AccountModel account) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString(
+      "account",
+      jsonEncode({
+        "_id": account.accountID,
+        "name": account.name,
+        "email": account.email,
+        "phone": account.phone,
+        "password": account.password, // thêm dòng này
+      }),
+    );
   }
 }

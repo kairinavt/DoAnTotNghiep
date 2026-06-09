@@ -67,10 +67,7 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen>
   }
 
   String _formatCurrency(double amount) {
-    final formatted = amount
-        .toInt()
-        .toString()
-        .replaceAllMapped(
+    final formatted = amount.toInt().toString().replaceAllMapped(
           RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
           (m) => '${m[1]}.',
         );
@@ -249,21 +246,21 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen>
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF0063B2), Color(0xFF00A550)],
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Text(
-                          'VietQR',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 16,
-                            letterSpacing: 1,
-                          ),
-                        ),
+                        // decoration: BoxDecoration(
+                        //   gradient: const LinearGradient(
+                        //     colors: [Color(0xFF0063B2), Color(0xFF00A550)],
+                        //   ),
+                        //   borderRadius: BorderRadius.circular(8),
+                        // ),
+                        // child: const Text(
+                        //   'VietQR',
+                        //   style: TextStyle(
+                        //     color: Colors.white,
+                        //     fontWeight: FontWeight.w900,
+                        //     fontSize: 16,
+                        //     letterSpacing: 1,
+                        //   ),
+                        // ),
                       ),
                     ],
                   ),
@@ -297,8 +294,8 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen>
                   const SizedBox(height: 20),
 
                   // Thông tin ngân hàng
-                  _infoRow(Icons.account_balance, 'Ngân hàng',
-                      'Vietcombank (VCB)'),
+                  _infoRow(
+                      Icons.account_balance, 'Ngân hàng', 'Vietcombank (VCB)'),
                   const SizedBox(height: 8),
                   _infoRow(Icons.account_box_outlined, 'Tài khoản',
                       VietQRService.shopAccountNo),
@@ -345,15 +342,15 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen>
               decoration: BoxDecoration(
                 color: const Color(0xFFFFF3F5),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                    color: const Color(0xFFf56789).withOpacity(0.3)),
+                border:
+                    Border.all(color: const Color(0xFFf56789).withOpacity(0.3)),
               ),
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('📱 Hướng dẫn thanh toán:',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w700, fontSize: 14)),
+                      style:
+                          TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
                   SizedBox(height: 8),
                   Text('1. Mở app ngân hàng của bạn',
                       style: TextStyle(fontSize: 13, color: Colors.black87)),

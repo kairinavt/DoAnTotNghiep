@@ -35,7 +35,7 @@ export class ProductEditComponent implements OnInit {
       }
     }
   };
-  title: string = 'Thêm Sản Phẩm'
+  title: string = 'Thêm món ăn'
   constructor(private productService: ProductService, private modal: NgbActiveModal,
     private toast: MessageService
   ) {}
@@ -84,24 +84,49 @@ export class ProductEditComponent implements OnInit {
     })
   }
 
-  submit() {
-    this.product.inclueId = this.product.includeIdForEdit;
-    const obser$ = this.product._id 
-      ? this.productService.updatePro(this.product)
-      : this.productService.newPro(this.product);
-    obser$
-    .pipe(first())
-    .subscribe({
-      next:(value) => {
-        if(value)
-        this.modal.close(true);
-        this.toast.add({ severity: 'success', summary: 'Thành công', detail: 'Lưu thông tin sản phẩm thành công' });
-      },
-      error:(err) => {
-        this.toast.add({ severity: 'danger', summary: 'Lỗi', detail: 'Lưu thông tin sản phẩm không thành công' });
-      },
-    })
+ submit() {
+  if (this.form.invalid) return;
+
+  this.product.inclueId = this.product.includeIdForEdit;
+  this.product.price = Number(this.product.price);
+  this.product.quantity = Number(this.product.quantity);
+  
+  if (!this.product.cateid) {
+    this.toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng chọn loại món ăn' });
+    return;
   }
+
+  if (this.product.price < 1000) {
+    this.toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Giá tiền phải từ 1.000đ trở lên' });
+    return;
+  }
+
+  if (!this.product.nameProduct?.trim()) {
+    this.toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng nhập tên món ăn' });
+    return;
+  }
+
+  if (!this.product.img?.trim()) {
+    this.toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng nhập link ảnh' });
+    return;
+  }
+
+  const obser$ = this.product._id 
+    ? this.productService.updatePro(this.product)
+    : this.productService.newPro(this.product);
+
+  obser$.pipe(first()).subscribe({
+    next: (value) => {
+  if (value) {
+    this.toast.add({ severity: 'success', summary: 'Thành công', detail: 'Lưu thông tin món ăn thành công' });
+    this.modal.close(true);
+  }
+},
+    error: (err) => {
+      this.toast.add({ severity: 'danger', summary: 'Lỗi', detail: 'Lưu thông tin món ăn không thành công' });
+    },
+  });
+}
 
   close() {
     this.modal.close();

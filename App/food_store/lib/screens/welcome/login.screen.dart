@@ -96,15 +96,23 @@ class _LoginScreenState extends State<LoginScreen> {
           field: FormBuilderTextField(
               name: 'email',
               validator: FormBuilderValidators.compose([
-                FormBuilderValidators.required(),
-                FormBuilderValidators.email(),
+                FormBuilderValidators.required(
+                    errorText: 'Email không được để trống'),
+                (value) {
+                  final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$');
+                  if (value != null && !emailRegex.hasMatch(value)) {
+                    return 'Email không đúng định dạng';
+                  }
+                  return null;
+                },
               ]),
               decoration: genericInputDecoration(label: 'Email'))),
       genericFieldContainer(
         field: FormBuilderTextField(
           name: 'password',
           validator: FormBuilderValidators.compose([
-            FormBuilderValidators.required(),
+            FormBuilderValidators.required(
+                errorText: 'Mật khẩu không được để trống'),
           ]),
           obscureText: true,
           enableSuggestions: false,
@@ -144,7 +152,6 @@ class _LoginScreenState extends State<LoginScreen> {
         elevation: 10,
         focusElevation: 5,
         onPressed: () async {
-          // Validate and save the form values
           if (_loginForm.currentState!.saveAndValidate()) {
             LoginModel model = LoginModel();
             model.fromJsonMapping(_loginForm.currentState!.value);
@@ -158,14 +165,13 @@ class _LoginScreenState extends State<LoginScreen> {
             } catch (onError) {
               debugPrint('Login error: $onError');
               Fluttertoast.showToast(
-                msg: "Sai mật khẩu hoặc email",
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.BOTTOM,
-                timeInSecForIosWeb: 1,
-                backgroundColor: Colors.red,
-                textColor: Colors.white,
-                fontSize: 16.0
-              );
+                  msg: "Sai mật khẩu hoặc email",
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  fontSize: 16.0);
             }
           }
         },

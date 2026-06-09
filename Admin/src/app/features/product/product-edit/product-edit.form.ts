@@ -12,19 +12,25 @@ export function ProductDetailFields(): FormlyFieldConfig[] {
                     key: 'nameProduct',
                     type: FORMLY_INPUT.name,
                     props: {
-                        label: 'Tên Sản Phẩm',
+                        label: 'Tên món ăn',
                         required: true
                     }
                 },
                 {
-                    className: 'col-6',
-                    key: 'price',
-                    type: FORMLY_INPUT.name,
-                    props: {
-                        label: 'Giá Tiền',
-                        required: true,
-                        keyFilter: KeyFilterType.money
-                    }
+                     className: 'col-6',
+    key: 'price',
+    type: FORMLY_INPUT.name,
+    props: {
+        label: 'Giá Tiền',
+        required: true,
+        keyFilter: KeyFilterType.money
+    },
+    validators: {
+        minPrice: {
+            expression: (control: any) => !control.value || Number(control.value) >= 1000,
+            message: 'Giá tiền phải từ 1.000đ trở lên'
+        }
+    }
                 },
                 {
                     className: 'col-6',
@@ -37,23 +43,29 @@ export function ProductDetailFields(): FormlyFieldConfig[] {
                     }
                 },
                 {
-                    className: 'col-6',
-                    key: 'cateid',
-                    type: FORMLY_SELECT.name,
-                    props: {
-                        label: 'Loại Sản Phẩm',
-                        searchable: true
-                    },
-                    expressions: {
-                        'props.options': "formState.optionList.categories"
-                    }
+                     className: 'col-6',
+    key: 'cateid',
+    type: FORMLY_SELECT.name,
+    props: {
+        label: 'Loại món ăn',
+        required: true,
+        searchable: true
+    },
+    validation: {
+        messages: {
+            required: 'Vui lòng chọn loại món ăn'
+        }
+    },
+    expressions: {
+        'props.options': "formState.optionList.categories"
+    }
                 },
                 {
                     className: 'col-12',
                     key: 'includeIdForEdit',
                     type: FORMLY_SELECT.name,
                     props: {
-                        label: 'Sản Phẩm Bao Gồm',
+                        label: 'món ăn Bao Gồm',
                         multiple: true,
                         searchable: true
                     },

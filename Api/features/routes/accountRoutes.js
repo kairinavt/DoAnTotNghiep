@@ -25,18 +25,27 @@ router.post('/signup-update', async (req, res) => {
 
 
 router.post('/login', async (req,res) => {
-    /*  
-        #swagger.tags = ['Accounts']
-        #swagger.parameters['body'] = {
-            in: 'body',
-            description: 'Login.',
-            schema: { $ref: '#/definitions/Login' }
-        } 
-        #swagger.responses[200] = { description: 'Login success', schema: { $ref: '#/definitions/Accounts' } }
-        #swagger.responses[500] = { description: 'Login failt', schema: 'error' }
-    */
-    var result = await accountController.Login(req.body, res);
-    return genericHttpResponse.success(res, result);
+
+    try {
+
+        var result = await accountController.Login(req.body, res);
+
+        if(result == null){
+            return res.status(401).json({
+                message:"Sai email hoặc mật khẩu"
+            });
+        }
+
+        return res.status(200).json(result);
+
+    } catch(e){
+
+        return res.status(500).json({
+            message:e.message
+        });
+
+    }
+
 });
 
 router.get('/get-list', async (req, res) => {

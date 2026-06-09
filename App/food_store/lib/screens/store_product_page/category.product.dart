@@ -12,7 +12,8 @@ class CategoryProductsScreen extends StatefulWidget {
   final String categoryId;
   final String categoryName;
 
-  const CategoryProductsScreen({super.key, required this.categoryId, required this.categoryName});
+  const CategoryProductsScreen(
+      {super.key, required this.categoryId, required this.categoryName});
 
   @override
   State<CategoryProductsScreen> createState() => _CategoryProductsScreenState();
@@ -30,7 +31,7 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
     _fetchProducts();
   }
 
-void _sortProducts(String sortOption) {
+  void _sortProducts(String sortOption) {
     setState(() {
       if (sortOption == 'A-Z') {
         products.sort((a, b) => a.nameProduct.compareTo(b.nameProduct));
@@ -46,7 +47,8 @@ void _sortProducts(String sortOption) {
 
   Future<void> _fetchProducts() async {
     try {
-      List<ProductModel> productList = await _productService.getProductsByCategory(widget.categoryId);
+      List<ProductModel> productList =
+          await _productService.getProductsByCategory(widget.categoryId);
       setState(() {
         products = productList;
       });
@@ -57,7 +59,8 @@ void _sortProducts(String sortOption) {
 
   Future<void> _searchProducts(String keyword) async {
     try {
-      List<ProductModel> productList = await _productService.searchProductsByCategory(widget.categoryId, keyword);
+      List<ProductModel> productList = await _productService
+          .searchProductsByCategory(widget.categoryId, keyword);
       setState(() {
         products = productList;
       });
@@ -111,7 +114,7 @@ void _sortProducts(String sortOption) {
           ],
         ),
       ),
-      drawer: const CustomDrawer(),
+      // drawer: const CustomDrawer(),
     );
   }
 }

@@ -13,9 +13,13 @@ class CategoryController {
     }
     
     async UpdateCategory(req, res) {
-        const updatedData = req.body;
-        return await categoryService.UpdateCategory(req.params._id, updatedData);
-    }
+    const updatedData = req.body;
+
+    return await categoryService.UpdateCategory(
+        req.params.id,
+        updatedData
+    );
+}
 
     async DeleteCategory(req, res) {
         return await categoryService.DeleteCategory(req.params.id);

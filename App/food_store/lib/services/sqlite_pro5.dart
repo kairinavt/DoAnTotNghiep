@@ -47,15 +47,26 @@ class SQLiteService {
       return maps.first['link'];
     }
     return null;
+    
   }
 
   Future<void> updateAvatarLink(String link) async {
     final db = await database;
-    await db.update(
-      'avatar',
-      {'link': link},
-      where: 'id = ?',
-      whereArgs: [1], // Assuming there's only one row with ID = 1
-    );
+
+    final result = await db.query('avatar');
+
+    if (result.isEmpty) {
+      await db.insert(
+        'avatar',
+        {'link': link},
+      );
+    } else {
+      await db.update(
+        'avatar',
+        {'link': link},
+        where: 'id = ?',
+        whereArgs: [result.first['id']],
+      );
+    }
   }
 }
