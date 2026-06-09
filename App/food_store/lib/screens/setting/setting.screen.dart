@@ -4,6 +4,7 @@ import 'package:food_store/screens/user/history.purchase.dart';
 import 'package:food_store/screens/user/profile.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:food_store/screens/welcome/login.screen.dart';
 import 'package:food_store/services/share_pre.dart';
 import 'package:food_store/services/sqlite_pro5.dart';
 import 'package:food_store/models/authorize/signup.model.dart';
@@ -76,47 +77,76 @@ class _SettingScreenState extends State<SettingScreen> {
   void _showLogoutDialog(Color primaryColor) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: isDarkMode ? const Color(0xff1E1E1E) : Colors.white,
-        title: Text('Đăng xuất?',
-            style: TextStyle(
-                fontFamily: 'Rubik',
-                fontWeight: FontWeight.w800,
-                fontSize: 17,
-                color: isDarkMode ? Colors.white : const Color(0xff1D1D1F))),
-        content: Text('Bạn có chắc muốn đăng xuất khỏi tài khoản không?',
-            style: TextStyle(
-                fontFamily: 'Rubik',
-                fontSize: 14,
-                color: isDarkMode ? Colors.white54 : Colors.grey.shade600)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Hủy',
-                style: TextStyle(
-                    fontFamily: 'Rubik',
-                    fontWeight: FontWeight.w600,
-                    color: isDarkMode ? Colors.white54 : Colors.grey.shade500)),
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-          TextButton(
-            onPressed: () {
-              sharedPreferencesService.saveLoginInfo(
-                  curAccount.accountID!, false);
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => const MyApp()),
-                (route) => false,
-              );
-            },
-            child: const Text('Đăng xuất',
-                style: TextStyle(
-                    fontFamily: 'Rubik',
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xffFF453A))),
+          backgroundColor: isDarkMode ? const Color(0xff1E1E1E) : Colors.white,
+          title: Text(
+            'Đăng xuất?',
+            style: TextStyle(
+              fontFamily: 'Rubik',
+              fontWeight: FontWeight.w800,
+              fontSize: 17,
+              color: isDarkMode ? Colors.white : const Color(0xff1D1D1F),
+            ),
           ),
-        ],
-      ),
+          content: Text(
+            'Bạn có chắc muốn đăng xuất khỏi tài khoản không?',
+            style: TextStyle(
+              fontFamily: 'Rubik',
+              fontSize: 14,
+              color: isDarkMode ? Colors.white54 : Colors.grey.shade600,
+            ),
+          ),
+          actions: [
+            // HỦY
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child: Text(
+                'Hủy',
+                style: TextStyle(
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+
+            // ĐĂNG XUẤT
+            TextButton(
+              onPressed: () async {
+                // đóng dialog bằng context của dialog
+                Navigator.pop(dialogContext);
+
+                final id = curAccount.accountID;
+
+                if (id != null) {
+                  await sharedPreferencesService.saveLoginInfo(id, false);
+                }
+
+                // chuyển trang
+                if (!mounted) return;
+
+                Navigator.of(dialogContext).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (_) => const MyApp(),
+                  ),
+                  (route) => false,
+                );
+              },
+              child: const Text(
+                'Đăng xuất',
+                style: TextStyle(
+                  color: Color(0xffFF453A),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

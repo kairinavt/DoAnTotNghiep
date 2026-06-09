@@ -21,16 +21,36 @@ class AccountService {
     }
 
     async Login(email, password, res) {
-        try {
-            var doc = await AccountModel.findOne({email: email, password: password}).exec();
-            
-            return await AccountModel.findOne({email, password}).exec();
-        } 
-        catch(e) {
-            return res.status(500).send(e); 
+    try {
+
+        const user = await AccountModel.findOne({
+            email: email
+        }).exec();
+
+        console.log("USER LOGIN:", user);
+        console.log("INPUT PASSWORD:", password);
+        console.log("DB PASSWORD:", user.password);
+
+
+        if (!user) {
+            return null;
         }
-        return null;
+
+
+        if (user.password !== password) {
+            console.log("PASSWORD NOT MATCH");
+            return null;
+        }
+
+
+        console.log("LOGIN SUCCESS");
+
+        return user;
+
+    } catch(e) {
+        return res.status(500).send(e);
     }
+}
 
     async GetList(res) {
         try {
@@ -65,5 +85,57 @@ class AccountService {
             return res.status(500).send(e);
         }
     }
+    async SignupUpdate(data, res) {
+    try {
+
+        const {
+            name,
+            email,
+            phone,
+            password
+        } = data;
+
+        console.log("REGISTER:", {
+            name,
+            email,
+            phone,
+            password
+        });
+
+
+        let account = await AccountModel.findOne({
+            email: email
+        });
+
+
+        if (account) {
+            account.name = name;
+            account.phone = phone;
+            account.password = password;
+
+            await account.save();
+
+            return true;
+        }
+
+
+        account = new AccountModel({
+            name,
+            email,
+            phone,
+            password
+        });
+
+
+        await account.save();
+
+        return true;
+
+
+    } catch(e) {
+        console.log(e);
+        return res.status(500).send(e);
+    }
+}
 }
 module.exports = AccountService;

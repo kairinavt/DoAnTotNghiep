@@ -17,7 +17,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _registerForm = GlobalKey<FormBuilderState>();
   static AuthorizeService authorizeService = AuthorizeService();
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,12 +53,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     height: 20,
                   ),
                   FormBuilder(
-                    key: _registerForm,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    child: Column(
-                      children: getRegisterForm()
-                    )
-                  ),
+                      key: _registerForm,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      child: Column(children: getRegisterForm())),
                 ],
               ),
             ),
@@ -74,7 +71,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         field: FormBuilderTextField(
           name: 'name',
           validator: FormBuilderValidators.compose([
-            FormBuilderValidators.required(),
+            FormBuilderValidators.required(
+                errorText: 'Tên không được để trống'),
           ]),
           decoration: genericInputDecoration(
             label: 'Tên',
@@ -86,8 +84,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
         field: FormBuilderTextField(
           name: 'email',
           validator: FormBuilderValidators.compose([
-            FormBuilderValidators.required(),
-            FormBuilderValidators.email(),
+            FormBuilderValidators.required(
+                errorText: 'Email không được để trống'),
+            (value) {
+              final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$');
+              if (value != null && !emailRegex.hasMatch(value)) {
+                return 'Email không đúng định dạng';
+              }
+              return null;
+            },
           ]),
           decoration: genericInputDecoration(
             label: 'Email',
@@ -99,10 +104,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         field: FormBuilderTextField(
           name: 'phone',
           validator: FormBuilderValidators.compose([
-            FormBuilderValidators.required(),
-            FormBuilderValidators.maxLength(12),
-            FormBuilderValidators.minLength(10),
-            FormBuilderValidators.numeric(),
+            FormBuilderValidators.required(
+                errorText: 'Số điện thoại không được để trống'),
+            FormBuilderValidators.numeric(
+                errorText: 'Số điện thoại chỉ được chứa chữ số'),
+            FormBuilderValidators.minLength(10,
+                errorText: 'Số điện thoại phải có ít nhất 10 số'),
+            FormBuilderValidators.maxLength(12,
+                errorText: 'Số điện thoại không được quá 12 số'),
           ]),
           decoration: genericInputDecoration(
             label: 'Số Điện Thoại',
@@ -114,8 +123,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         field: FormBuilderTextField(
           name: 'password',
           validator: FormBuilderValidators.compose([
-            FormBuilderValidators.required(),
-            FormBuilderValidators.minLength(6),
+            FormBuilderValidators.required(
+                errorText: 'Mật khẩu không được để trống'),
+            FormBuilderValidators.minLength(6,
+                errorText: 'Mật khẩu phải có ít nhất 6 ký tự'),
           ]),
           obscureText: true,
           enableSuggestions: false,
@@ -138,17 +149,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
         elevation: 10,
         focusElevation: 5,
         onPressed: () {
-          // Validate and save the form values
-          if(_registerForm.currentState!.saveAndValidate()) {
+          if (_registerForm.currentState!.saveAndValidate()) {
             AccountModel data = AccountModel();
             data.fromJsonMapping(_registerForm.currentState!.value);
 
-            authorizeService.signup(data)
-            .then((val) => Navigator
-                .of(context)
-                .push(MaterialPageRoute(builder: (context) => const LoginScreen())))
-            .catchError((onError) => debugPrint(onError.toString())); 
-            
+            authorizeService
+                .signup(data)
+                .then((val) => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const LoginScreen())))
+                .catchError((onError) => debugPrint(onError.toString()));
           }
         },
         child: const Text(
@@ -162,8 +171,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-                builder: (context) => const LoginScreen()),
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
         },
         child: const Text(
