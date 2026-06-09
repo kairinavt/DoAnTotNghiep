@@ -8,13 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 // ─── Màu chủ đạo ─────────────────────────────────────────────────────────────
-const Color kPink        = Color(0xFFf56789);
-const Color kPinkLight   = Color(0xFFFFECF0);
-const Color kPinkDark    = Color(0xFFD94F6E);
-const Color kBg          = Color(0xFFFDF6F8);
-const Color kCard        = Colors.white;
-const Color kTextDark    = Color(0xFF1A1A2E);
-const Color kTextGrey    = Color(0xFF9E9E9E);
+const Color kPink = Color(0xFFf56789);
+const Color kPinkLight = Color(0xFFFFECF0);
+const Color kPinkDark = Color(0xFFD94F6E);
+const Color kBg = Color(0xFFFDF6F8);
+const Color kCard = Colors.white;
+const Color kTextDark = Color(0xFF1A1A2E);
+const Color kTextGrey = Color(0xFF9E9E9E);
 
 class StoreMainScreen extends StatefulWidget {
   const StoreMainScreen({super.key});
@@ -29,7 +29,7 @@ class _StoreMainScreenState extends State<StoreMainScreen>
   final ProductService _productService = ProductService();
 
   // ── Data ──────────────────────────────────────────────────────────────────
-  List<ProductModel> _allProducts     = [];
+  List<ProductModel> _allProducts = [];
   List<ProductModel> _favoriteProducts = [];
   List<ProductModel> _filteredProducts = [];
 
@@ -111,10 +111,10 @@ class _StoreMainScreenState extends State<StoreMainScreen>
       ]);
       if (!mounted) return;
       setState(() {
-        _allProducts      = results[0];
+        _allProducts = results[0];
         _favoriteProducts = results[1];
         _filteredProducts = results[0];
-        _isLoading        = false;
+        _isLoading = false;
       });
     } catch (e) {
       if (!mounted) return;
@@ -136,8 +136,7 @@ class _StoreMainScreenState extends State<StoreMainScreen>
 
   Future<void> _navigateToProduct(ProductModel product) async {
     final result = await Navigator.of(context).push(
-      MaterialPageRoute(
-          builder: (_) => ProductDisplayScreen(product: product)),
+      MaterialPageRoute(builder: (_) => ProductDisplayScreen(product: product)),
     );
     if (result != null && result is ProductModel) _loadAllData();
   }
@@ -159,7 +158,7 @@ class _StoreMainScreenState extends State<StoreMainScreen>
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: kBg,
-      drawer: const CustomDrawer(),
+      // drawer: const CustomDrawer(),
       body: SafeArea(
         child: _isLoading
             ? _buildSkeleton()
@@ -175,22 +174,21 @@ class _StoreMainScreenState extends State<StoreMainScreen>
                     else ...[
                       _buildBannerSliver(),
                       _buildCategoryBar(),
-                      _buildSectionSliver(
-                          '❤️ Đã thích', _favoriteProducts,
-                          seeAll: true,
-                          onSeeAll: () {
-                            // Điều hướng dạng Push một trang độc lập hợp lý cho nút "Xem tất cả"
-                            Navigator.push(context, MaterialPageRoute(
-                              builder: (_) => const FavoriteScreen()
-                            ));
-                          }),
-                      _buildSectionSliver(
-                          '🔥 Bán nhiều nhất', _allProducts,
+                      _buildSectionSliver('❤️ Đã thích', _favoriteProducts,
+                          seeAll: true, onSeeAll: () {
+                        // Điều hướng dạng Push một trang độc lập hợp lý cho nút "Xem tất cả"
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const FavoriteScreen()));
+                      }),
+                      _buildSectionSliver('🔥 Bán nhiều nhất', _allProducts,
                           seeAll: true),
                       _buildSectionSliver(
                           '⭐ Đánh giá cao',
                           [..._allProducts]..sort((a, b) =>
-                              (b.fav ?? false ? 1 : 0) - (a.fav ?? false ? 1 : 0)),
+                              (b.fav ?? false ? 1 : 0) -
+                              (a.fav ?? false ? 1 : 0)),
                           seeAll: true),
                       _buildSectionSliver(
                           '🆕 Món mới ra', _allProducts.reversed.toList(),
@@ -211,24 +209,25 @@ class _StoreMainScreenState extends State<StoreMainScreen>
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
         child: Row(
           children: [
-            GestureDetector(
-              onTap: () => _scaffoldKey.currentState?.openDrawer(),
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: kCard,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.black.withOpacity(0.07),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2)),
-                  ],
-                ),
-                child: const Icon(Icons.menu_rounded, color: kTextDark, size: 22),
-              ),
-            ),
+            // GestureDetector(
+            //   onTap: () => _scaffoldKey.currentState?.openDrawer(),
+            //   child: Container(
+            //     width: 44,
+            //     height: 44,
+            //     decoration: BoxDecoration(
+            //       color: kCard,
+            //       borderRadius: BorderRadius.circular(12),
+            //       boxShadow: [
+            //         BoxShadow(
+            //             color: Colors.black.withOpacity(0.07),
+            //             blurRadius: 8,
+            //             offset: const Offset(0, 2)),
+            //       ],
+            //     ),
+            //     child:
+            //         const Icon(Icons.menu_rounded, color: kTextDark, size: 22),
+            //   ),
+            // ),
             const SizedBox(width: 14),
             const Expanded(
               child: Column(
@@ -310,8 +309,7 @@ class _StoreMainScreenState extends State<StoreMainScreen>
                     )
                   : null,
               border: InputBorder.none,
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 15),
+              contentPadding: const EdgeInsets.symmetric(vertical: 15),
             ),
           ),
         ),
@@ -443,8 +441,7 @@ class _StoreMainScreenState extends State<StoreMainScreen>
                     ],
                   ),
                 ),
-                Text(b['icon'] as String,
-                    style: const TextStyle(fontSize: 56)),
+                Text(b['icon'] as String, style: const TextStyle(fontSize: 56)),
               ],
             ),
           ),
@@ -529,16 +526,17 @@ class _StoreMainScreenState extends State<StoreMainScreen>
                   title,
                   style: const TextStyle(
                     color: kTextDark,
-                    fontSize: 18, 
+                    fontSize: 18,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.3,
                   ),
                 ),
                 if (seeAll && onSeeAll != null)
-                  GestureDetector( 
+                  GestureDetector(
                     onTap: onSeeAll,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
                         color: kPinkLight.withOpacity(0.4),
                         borderRadius: BorderRadius.circular(20),
@@ -555,7 +553,8 @@ class _StoreMainScreenState extends State<StoreMainScreen>
                             ),
                           ),
                           SizedBox(width: 2),
-                          Icon(Icons.chevron_right_rounded, color: kPink, size: 16),
+                          Icon(Icons.chevron_right_rounded,
+                              color: kPink, size: 16),
                         ],
                       ),
                     ),
@@ -563,15 +562,14 @@ class _StoreMainScreenState extends State<StoreMainScreen>
               ],
             ),
           ),
-          
           SizedBox(
-            height: 240, 
+            height: 240,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(), 
+              physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 14),
               itemCount: displayList.length,
-              itemBuilder: (_, i) => _buildProductCard(displayList[i]), 
+              itemBuilder: (_, i) => _buildProductCard(displayList[i]),
             ),
           ),
         ],
@@ -579,23 +577,23 @@ class _StoreMainScreenState extends State<StoreMainScreen>
     );
   }
 
-  Widget _buildProductCard(ProductModel product) { 
+  Widget _buildProductCard(ProductModel product) {
     return Container(
       width: 160,
       margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       decoration: BoxDecoration(
-        color: kCard, 
-        borderRadius: BorderRadius.circular(24), 
-        border: Border.all(color: Colors.grey.withOpacity(0.08), width: 1), 
+        color: kCard,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey.withOpacity(0.08), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04), 
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
         ],
       ),
-      child: GestureDetector( 
+      child: GestureDetector(
         onTap: () => _navigateToProduct(product),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -603,7 +601,7 @@ class _StoreMainScreenState extends State<StoreMainScreen>
             Stack(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(8.0), 
+                  padding: const EdgeInsets.all(8.0),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: Image.network(
@@ -615,7 +613,8 @@ class _StoreMainScreenState extends State<StoreMainScreen>
                         width: double.infinity,
                         height: 115,
                         color: kPinkLight,
-                        child: const Icon(Icons.restaurant_rounded, color: kPink, size: 32),
+                        child: const Icon(Icons.restaurant_rounded,
+                            color: kPink, size: 32),
                       ),
                     ),
                   ),
@@ -637,25 +636,25 @@ class _StoreMainScreenState extends State<StoreMainScreen>
                           )
                         ],
                       ),
-                      child: const Icon(Icons.favorite_rounded, color: kPink, size: 14),
+                      child: const Icon(Icons.favorite_rounded,
+                          color: kPink, size: 14),
                     ),
                   ),
               ],
             ),
-            
-            Expanded( 
+            Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       product.nameProduct,
                       style: const TextStyle(
                         color: kTextDark,
                         fontSize: 13.5,
-                        fontWeight: FontWeight.w600, 
+                        fontWeight: FontWeight.w600,
                         height: 1.3,
                       ),
                       maxLines: 2,
@@ -690,7 +689,8 @@ class _StoreMainScreenState extends State<StoreMainScreen>
                               )
                             ],
                           ),
-                          child: const Icon(Icons.shopping_cart_rounded, color: Colors.white, size: 18),
+                          child: const Icon(Icons.shopping_cart_rounded,
+                              color: Colors.white, size: 18),
                         ),
                       ],
                     ),

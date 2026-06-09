@@ -69,27 +69,16 @@ router.get('/find-category', async (req,res) => {
 });
 
 router.put('/update-category/:id', async (req, res) => {
-    /*  
-        #swagger.tags = ['Categories']
-        #swagger.parameters['id'] = {
-            in: 'path',
-            description: 'Update category by id',
-            required: true,
-            type: 'string'
-        }
-        #swagger.parameters['body'] = {
-            in: 'body',
-            description: 'Update category data',
-            schema: { $ref: '#/definitions/Categories' }
-        } 
-        #swagger.responses[200] = { description: 'Update success', schema: { $ref: '#/definitions/UpdateCategory' } }
-        #swagger.responses[500] = { description: 'Update failed', schema: 'error' }
-    */
-    var result = await categoryController.UpdateCategory(req, res);
-    if(result != null) genericHttpResponse.success(res, result);
-    else genericHttpResponse.fail(res, result);
-});
+    console.log('PARAMS', req.params);
+    console.log('BODY', req.body);
 
+    var result = await categoryController.UpdateCategory(req, res);
+
+    if(result != null)
+        genericHttpResponse.success(res, result);
+    else
+        genericHttpResponse.fail(res, result);
+});
 router.delete('/delete-category/:id', async (req, res) => {
     /*  
         #swagger.tags = ['Categories']

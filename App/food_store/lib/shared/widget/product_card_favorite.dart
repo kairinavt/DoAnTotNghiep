@@ -35,8 +35,8 @@ class _ProductCardState extends State<ProductCard> {
         SnackBar(
           content: Text(
             isFavorite
-                ? 'Bạn đã thích sản phẩm ${widget.product.nameProduct}'
-                : 'Bạn đã bỏ thích sản phẩm ${widget.product.nameProduct}',
+                ? 'Bạn đã thích món ăn ${widget.product.nameProduct}'
+                : 'Bạn đã bỏ thích món ăn ${widget.product.nameProduct}',
           ),
         ),
       );
@@ -110,7 +110,8 @@ class _ProductCardState extends State<ProductCard> {
               onTap: _navigateToProductDisplayScreen,
               child: Padding(
                 padding: const EdgeInsets.all(8),
-                child: Center(  // Sử dụng Center để căn giữa nội dung
+                child: Center(
+                  // Sử dụng Center để căn giữa nội dung
                   child: Text(
                     widget.product.nameProduct,
                     maxLines: 1,
@@ -125,7 +126,7 @@ class _ProductCardState extends State<ProductCard> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Center(  
+              child: Center(
                 child: Text(
                   '${widget.product.formattedPrice}đ',
                   style: const TextStyle(

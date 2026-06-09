@@ -60,4 +60,12 @@ export class ProductService {
       controller: 'Product', url: `/delete-product/${id}`
     })
   }
+  updateCategory(category: ICategory) {
+  return this.httpService.put({
+    controller: 'Categories',
+    url: `/update-category/${category._id}`,
+    data: category
+  });
 }
+}
+

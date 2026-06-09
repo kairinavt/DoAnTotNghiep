@@ -16,7 +16,7 @@ export class TopbarComponent {
   expanded: boolean[] = [];
   items: MenuItem[] = [
     {
-      label: 'Quản Lý Sản Phẩm',
+      label: 'Quản Lý món ăn',
       routerLink: '/product',
       command: () => this.navigate('product')
     },

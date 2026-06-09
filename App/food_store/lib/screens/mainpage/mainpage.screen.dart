@@ -24,10 +24,10 @@ class _MainPageScreenState extends State<MainPageScreen> {
 
   List<Widget> _getPages() {
     return [
-      const StoreMainScreen(),
-      const AllProductScreen(),
-      const CartPage(),
-      const FavoriteScreen(),
+      StoreMainScreen(),
+      AllProductScreen(),
+      CartPage(),
+      FavoriteScreen(),
       SettingScreen(
         isDarkMode: isDarkMode,
         onThemeChanged: (bool value) {
@@ -43,12 +43,14 @@ class _MainPageScreenState extends State<MainPageScreen> {
   void initState() {
     super.initState();
     final pages = _getPages();
-    
+
     if (widget.isBack != null && widget.isBack!) {
-      _currentIndex = pages.indexWhere((wg) => preScreen!.toString() == wg.toString());
+      _currentIndex =
+          pages.indexWhere((wg) => preScreen!.toString() == wg.toString());
     }
     if (widget.currentScreen != null) {
-      _currentIndex = pages.indexWhere((wg) => widget.currentScreen!.toString() == wg.toString());
+      _currentIndex = pages.indexWhere(
+          (wg) => widget.currentScreen!.toString() == wg.toString());
     }
     if (_currentIndex == -1) _currentIndex = 0;
     preScreen = pages[_currentIndex];
@@ -56,16 +58,19 @@ class _MainPageScreenState extends State<MainPageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Color primaryPink = const Color(0xffFF6584);       
-    final Color lightBarBg = const Color(0xffFFFFFF);        
-    final Color darkBarBg = const Color(0xff1E1E1E);         
-    
-    final Color activeIconColor = isDarkMode ? const Color(0xff1E1E1E) : Colors.white;
-    final Color inactiveIconColor = isDarkMode ? Colors.white38 : const Color(0xffA0A5BD);
-    final Color buttonBgColor = primaryPink;                 
+    final Color primaryPink = const Color(0xffFF6584);
+    final Color lightBarBg = const Color(0xffFFFFFF);
+    final Color darkBarBg = const Color(0xff1E1E1E);
+
+    final Color activeIconColor =
+        isDarkMode ? const Color(0xff1E1E1E) : Colors.white;
+    final Color inactiveIconColor =
+        isDarkMode ? Colors.white38 : const Color(0xffA0A5BD);
+    final Color buttonBgColor = primaryPink;
 
     final backgroundColor = isDarkMode ? darkBarBg : lightBarBg;
-    final scaffoldBgColor = isDarkMode ? const Color(0xff121212) : const Color(0xffF9F9FB);
+    final scaffoldBgColor =
+        isDarkMode ? const Color(0xff121212) : const Color(0xffF9F9FB);
 
     final currentPages = _getPages();
 
@@ -89,22 +94,24 @@ class _MainPageScreenState extends State<MainPageScreen> {
           ),
           child: CurvedNavigationBar(
             index: _currentIndex,
-            height: 62.0, 
+            height: 62.0,
             items: <Widget>[
-              _buildAnimatedIcon(Icons.home_rounded, _currentIndex == 0, activeIconColor, inactiveIconColor),
-              _buildAnimatedIcon(Icons.restaurant_menu_rounded, _currentIndex == 1, activeIconColor, inactiveIconColor),
-              _buildAnimatedIcon(Icons.shopping_cart_rounded, _currentIndex == 2, activeIconColor, inactiveIconColor),
-              _buildAnimatedIcon(Icons.favorite_rounded, _currentIndex == 3, activeIconColor, inactiveIconColor),
-              _buildAnimatedIcon(Icons.settings_rounded, _currentIndex == 4, activeIconColor, inactiveIconColor),
+              _buildAnimatedIcon(Icons.home_rounded, _currentIndex == 0,
+                  activeIconColor, inactiveIconColor),
+              _buildAnimatedIcon(Icons.restaurant_menu_rounded,
+                  _currentIndex == 1, activeIconColor, inactiveIconColor),
+              _buildAnimatedIcon(Icons.shopping_cart_rounded,
+                  _currentIndex == 2, activeIconColor, inactiveIconColor),
+              _buildAnimatedIcon(Icons.favorite_rounded, _currentIndex == 3,
+                  activeIconColor, inactiveIconColor),
+              _buildAnimatedIcon(Icons.settings_rounded, _currentIndex == 4,
+                  activeIconColor, inactiveIconColor),
             ],
             color: backgroundColor,
             buttonBackgroundColor: buttonBgColor,
-            backgroundColor: scaffoldBgColor, 
-            
-            
-            animationCurve: Curves.easeOutBack, 
+            backgroundColor: scaffoldBgColor,
+            animationCurve: Curves.easeOutBack,
             animationDuration: const Duration(milliseconds: 400),
-            
             onTap: (index) {
               setState(() {
                 preScreen = currentPages[_currentIndex];
@@ -118,7 +125,8 @@ class _MainPageScreenState extends State<MainPageScreen> {
     );
   }
 
-  Widget _buildAnimatedIcon(IconData icon, bool isSelected, Color activeColor, Color inactiveColor) {
+  Widget _buildAnimatedIcon(
+      IconData icon, bool isSelected, Color activeColor, Color inactiveColor) {
     return AnimatedScale(
       scale: isSelected ? 1.15 : 1.0,
       duration: const Duration(milliseconds: 200),

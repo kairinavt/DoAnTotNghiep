@@ -4,6 +4,9 @@ class ProductService {
     constructor() {}
 
     async NewProduct( nameProduct, price, img,quantity,descrip,cateid,inclueId) {
+        if (price < 1000) {
+            throw new Error('Giá sản phẩm phải từ 1.000đ trở lên');
+        }
         try {
             const product = new ProductModel({
                  nameProduct, price, img,quantity,descrip,cateid,inclueId
@@ -103,7 +106,7 @@ class ProductService {
             const products = await ProductModel.find({ cateid: categoryId }).exec();
             return products;
         } catch (e) {
-            throw new Error('Không thể lấy danh sách sản phẩm theo thể loại: ' + e.message);
+            throw new Error('Không thể lấy danh sách món ăn theo danh mục: ' + e.message);
         }
     }
 
@@ -115,7 +118,7 @@ class ProductService {
             }).exec();
             return products;
         } catch (e) {
-            throw new Error('Không thể tìm kiếm sản phẩm yêu thích: ' + e.message);
+            throw new Error('Không thể tìm kiếm món ăn yêu thích: ' + e.message);
         }
     }
 
@@ -127,7 +130,7 @@ class ProductService {
             }).exec();
             return products;
         } catch (e) {
-            throw new Error('Không thể tìm kiếm sản phẩm theo thể loại: ' + e.message);
+            throw new Error('Không thể tìm kiếm món ăn theo danh mục: ' + e.message);
         }
     }
 
