@@ -1,0 +1,221 @@
+<p-toast></p-toast>
+<div class="content container-fluid py-3">
+  <h3 class="page-title mb-4">Thống kê chi tiết</h3>
+
+  <!-- Loading -->
+  <div class="text-center py-5" *ngIf="loading">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem;"></i>
+    <p class="mt-2 text-muted">Đang tải dữ liệu...</p>
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <!-- Tab navigation -->
+    <ul class="nav nav-tabs mb-4">
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeTab === 'revenue'"
+          href="javascript:void(0)" (click)="activeTab = 'revenue'">
+          <i class="pi pi-chart-line me-1"></i> Doanh thu
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeTab === 'product'"
+          href="javascript:void(0)" (click)="activeTab = 'product'">
+          <i class="pi pi-box me-1"></i> Sản phẩm
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeTab === 'customer'"
+          href="javascript:void(0)" (click)="activeTab = 'customer'">
+          <i class="pi pi-users me-1"></i> Khách hàng
+        </a>
+      </li>
+    </ul>
+
+    <!-- ===== TAB DOANH THU ===== -->
+    <div *ngIf="activeTab === 'revenue'">
+      <!-- Thẻ tóm tắt -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm p-3 text-center">
+            <div class="text-muted small mb-1">Tổng doanh thu</div>
+            <div class="fw-bold fs-5 text-primary">{{ formatPrice(totalRevenue) }}</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm p-3 text-center">
+            <div class="text-muted small mb-1">Tổng đơn hoạt động</div>
+            <div class="fw-bold fs-5 text-success">{{ totalActiveOrders }}</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm p-3 text-center">
+            <div class="text-muted small mb-1">Giá trị đơn trung bình</div>
+            <div class="fw-bold fs-5 text-warning">{{ formatPrice(avgOrderValue) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Biểu đồ doanh thu -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-semibold mb-0">Biểu đồ doanh thu</h6>
+            <div class="btn-group btn-group-sm">
+              <button class="btn" [class.btn-primary]="revenueMode==='day'"
+                [class.btn-outline-primary]="revenueMode!=='day'"
+                (click)="switchRevenueMode('day')">Ngày</button>
+              <button class="btn" [class.btn-primary]="revenueMode==='week'"
+                [class.btn-outline-primary]="revenueMode!=='week'"
+                (click)="switchRevenueMode('week')">Tuần</button>
+              <button class="btn" [class.btn-primary]="revenueMode==='month'"
+                [class.btn-outline-primary]="revenueMode!=='month'"
+                (click)="switchRevenueMode('month')">Tháng</button>
+            </div>
+          </div>
+          <p-chart type="line" [data]="revenueChartData" [options]="revenueChartOptions" height="300px"></p-chart>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB SẢN PHẨM ===== -->
+    <div *ngIf="activeTab === 'product'">
+      <div class="row g-3 mb-4">
+
+        <!-- Biểu đồ tròn bán chạy -->
+        <div class="col-md-5">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <h6 class="fw-semibold mb-3">Tỷ lệ bán theo sản phẩm</h6>
+              <p-chart type="doughnut" [data]="topSaleChartData" [options]="topSaleChartOptions" height="260px"></p-chart>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bảng top sản phẩm -->
+        <div class="col-md-7">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <h6 class="fw-semibold mb-3">Top sản phẩm bán chạy</h6>
+              <table class="table table-sm align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>#</th>
+                    <th>Sản phẩm</th>
+                    <th class="text-center">Đã bán</th>
+                    <th class="text-end">Doanh thu</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let p of topProducts; let i = index">
+                    <td>
+                      <span class="rank-badge"
+                        [class.rank-gold]="i===0"
+                        [class.rank-silver]="i===1"
+                        [class.rank-bronze]="i===2">{{ i+1 }}</span>
+                    </td>
+                    <td>
+                      <div class="d-flex align-items-center gap-2">
+                        <img [src]="p.img || 'assets/images/placeholder.png'"
+                          width="36" height="36" style="object-fit:cover;border-radius:6px;">
+                        <span class="small fw-semibold">{{ p.name }}</span>
+                      </div>
+                    </td>
+                    <td class="text-center">{{ p.qty }} món</td>
+                    <td class="text-end">{{ formatPrice(p.revenue) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Biểu đồ tồn kho -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-1">Tồn kho theo sản phẩm</h6>
+          <p class="text-muted small mb-3">
+            <span class="badge bg-success me-1">Đủ hàng</span>
+            <span class="badge bg-warning text-dark me-1">Sắp hết</span>
+            <span class="badge bg-danger">Hết hàng</span>
+          </p>
+          <p-chart type="bar" [data]="inventoryChartData" [options]="inventoryChartOptions" height="280px"></p-chart>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB KHÁCH HÀNG ===== -->
+    <div *ngIf="activeTab === 'customer'">
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm p-3 text-center">
+            <div class="text-muted small mb-1">Tổng khách hàng</div>
+            <div class="fw-bold fs-5 text-primary">{{ newCustomers + returningCustomers }}</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm p-3 text-center">
+            <div class="text-muted small mb-1">Khách hàng mới</div>
+            <div class="fw-bold fs-5 text-success">{{ newCustomers }}</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm p-3 text-center">
+            <div class="text-muted small mb-1">Khách hàng quay lại</div>
+            <div class="fw-bold fs-5 text-warning">{{ returningCustomers }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <!-- Biểu đồ doanh thu theo khách hàng -->
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <h6 class="fw-semibold mb-3">Top 6 khách hàng theo doanh thu</h6>
+              <p-chart type="bar" [data]="customerChartData" [options]="customerChartOptions" height="300px"></p-chart>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bảng top khách hàng -->
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <h6 class="fw-semibold mb-3">Bảng xếp hạng khách hàng</h6>
+              <table class="table table-sm align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>#</th>
+                    <th>Tên</th>
+                    <th class="text-center">Đơn hàng</th>
+                    <th class="text-end">Doanh thu</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let c of topCustomers; let i = index">
+                    <td>
+                      <span class="rank-badge"
+                        [class.rank-gold]="i===0"
+                        [class.rank-silver]="i===1"
+                        [class.rank-bronze]="i===2">{{ i+1 }}</span>
+                    </td>
+                    <td>
+                      <div class="fw-semibold small">{{ c.name }}</div>
+                      <div class="text-muted" style="font-size:0.75rem">{{ c.email }}</div>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge bg-primary-soft text-primary">{{ c.orders }} đơn</span>
+                    </td>
+                    <td class="text-end small fw-semibold">{{ formatPrice(c.revenue) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

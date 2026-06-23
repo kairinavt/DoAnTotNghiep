@@ -29,12 +29,38 @@ export class TopbarComponent {
           routerLink: '/bill',
           command: onclick => this.navigate('bill')
         },
+        {
+          label: 'Trạng thái Đơn hàng',
+          routerLink: '/order',
+          command: onclick => this.navigate('order')
+        }
       ]
     },
     {
       label: 'Quản Lý Tài Khoản',
       routerLink: '/account',
       command: () => this.navigate('account')
+    },
+    {
+      label: 'Quản Lý Kho',
+      expanded: false,
+      items: [
+        {
+          label: 'Nhập hàng',
+          routerLink: '/warehouse',
+          command: onclick => this.navigate('warehouse')
+        },
+        {
+          label: 'Xuất hàng',
+          routerLink: '/warehouse/export',
+          command: onclick => this.navigate('warehouse/export')
+        }
+      ]
+    },
+    {
+      label: 'Thống kê',
+      routerLink: '/statistics',
+      command: () => this.navigate('statistics')
     },
   ];
   visibleSidebar = false;

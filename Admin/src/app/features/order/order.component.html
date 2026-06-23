@@ -1,0 +1,196 @@
+<p-toast></p-toast>
+
+<div class="content container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="page-title">Quản lý đơn hàng</h3>
+
+    <div class="d-flex align-items-center gap-2">
+      <label class="form-label mb-0 fw-semibold">Trạng thái:</label>
+      <select class="form-select form-select-sm" style="width: 180px;"
+        [(ngModel)]="selectedStatus" (change)="filterByStatus()">
+        <option *ngFor="let s of statusOptions" [value]="s.value">{{ s.label }}</option>
+      </select>
+      <button pButton icon="pi pi-refresh" class="p-button-rounded p-button-text"
+        pTooltip="Tải lại" (click)="getOrders()">
+      </button>
+    </div>
+  </div>
+
+  <!-- Thẻ tổng doanh thu (chỉ tính completed) -->
+  <div class="row g-3 mb-3">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm p-3 d-flex flex-row align-items-center gap-3">
+        <div class="rounded-circle bg-success bg-opacity-10 p-3">
+          <i class="pi pi-dollar text-success fs-5"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Doanh thu (đơn hoàn thành)</div>
+          <div class="fw-bold fs-5 text-success">{{ formatPrice(completedRevenue) }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm p-3 d-flex flex-row align-items-center gap-3">
+        <div class="rounded-circle bg-warning bg-opacity-10 p-3">
+          <i class="pi pi-clock text-warning fs-5"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Đang hoạt động</div>
+          <div class="fw-bold fs-5 text-warning">{{ activeCount }} đơn</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 d-flex align-items-center">
+      <button pButton
+        icon="pi pi-check-circle"
+        label="Hoàn thành tất cả ({{ activeCount }})"
+        class="p-button-success w-100"
+        [disabled]="activeCount === 0 || completingAll"
+        [loading]="completingAll"
+        (click)="completeAllOrders()">
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="text-center py-5" *ngIf="loading">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem;"></i>
+    <p class="mt-2 text-muted">Đang tải...</p>
+  </div>
+
+  <!-- Không có dữ liệu -->
+  <div class="text-center py-5" *ngIf="!loading && !filteredInvoices.length">
+    <i class="pi pi-inbox" style="font-size: 2.5rem; color: #ccc;"></i>
+    <p class="mt-2 text-muted">Không có đơn hàng nào</p>
+  </div>
+
+  <!-- Bảng đơn hàng -->
+  <p-table
+    *ngIf="!loading && filteredInvoices.length"
+    [value]="filteredInvoices"
+    dataKey="_id"
+    [rowHover]="true">
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 2rem"></th>
+        <th>Mã đơn</th>
+        <th>Ngày đặt</th>
+        <th>Khách hàng</th>
+        <th>Địa chỉ</th>
+        <th class="text-center">Số món</th>
+        <th class="text-end">Tổng tiền</th>
+        <th class="text-center">Trạng thái</th>
+        <th class="text-center">Thao tác</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-invoice let-expanded="expanded">
+      <tr [class.opacity-50]="invoice.status === 'cancelled'">
+        <td>
+          <p-button type="button" pRipple
+            [pRowToggler]="invoice" [text]="true" [rounded]="true" [plain]="true"
+            [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'">
+          </p-button>
+        </td>
+        <td class="fw-semibold">{{ invoice.nameInvoice }}</td>
+        <td>{{ invoice.dateDisplay }}</td>
+        <td>{{ invoice.account?.name || '—' }}</td>
+        <td>{{ invoice.addressDisplay }}</td>
+        <td class="text-center">{{ invoice.totalQty }} món</td>
+        <td class="text-end fw-semibold">{{ formatPrice(invoice.totalPrice) }}</td>
+        <td class="text-center">
+          <span class="badge bg-primary" *ngIf="(invoice.status || 'active') === 'active'">
+            Đang hoạt động
+          </span>
+          <span class="badge bg-success" *ngIf="invoice.status === 'completed'">
+            Hoàn thành
+          </span>
+          <span class="badge bg-secondary" *ngIf="invoice.status === 'cancelled'">
+            Đã hủy
+          </span>
+        </td>
+        <td class="text-center">
+          <div class="d-flex justify-content-center gap-1">
+            <!-- Nút hoàn thành: chỉ hiện khi active -->
+            <button
+              pButton pRipple
+              icon="pi pi-check"
+              class="p-button-rounded p-button-success p-button-sm"
+              pTooltip="Hoàn thành đơn"
+              *ngIf="(invoice.status || 'active') === 'active'"
+              (click)="completeOrder(invoice)">
+            </button>
+            <!-- Nút hủy: chỉ hiện khi active -->
+            <button
+              pButton pRipple
+              icon="pi pi-times"
+              class="p-button-rounded p-button-danger p-button-sm"
+              pTooltip="Hủy đơn hàng"
+              *ngIf="(invoice.status || 'active') === 'active'"
+              (click)="cancelOrder(invoice)">
+            </button>
+            <!-- Đơn completed/cancelled không có thao tác -->
+            <span *ngIf="invoice.status === 'completed' || invoice.status === 'cancelled'"
+              class="text-muted small">—</span>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <!-- Chi tiết đơn hàng -->
+    <ng-template pTemplate="rowexpansion" let-invoice>
+      <tr *ngIf="invoice.details && invoice.details.length">
+        <td colspan="9">
+          <div class="p-3">
+            <p-table [value]="invoice.details" dataKey="_id">
+              <ng-template pTemplate="caption">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="fw-semibold">Chi tiết đơn hàng {{ invoice.nameInvoice }}</span>
+                  <span *ngIf="invoice.status === 'cancelled'" class="text-danger small">
+                    <i class="pi pi-info-circle me-1"></i>
+                    Lý do hủy: {{ invoice.cancelReason || 'Không có' }}
+                  </span>
+                  <span *ngIf="invoice.status === 'completed'" class="text-success small">
+                    <i class="pi pi-check-circle me-1"></i>
+                    Đã hoàn thành — tính vào doanh thu
+                  </span>
+                </div>
+              </ng-template>
+              <ng-template pTemplate="header">
+                <tr>
+                  <th style="width: 7rem">Hình ảnh</th>
+                  <th>Tên sản phẩm</th>
+                  <th class="text-center">Số lượng</th>
+                  <th class="text-end">Đơn giá</th>
+                  <th class="text-end">Thành tiền</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-detail>
+                <tr>
+                  <td>
+                    <img [src]="detail.product?.img || 'assets/images/placeholder.png'"
+                      [alt]="detail.product?.nameProduct"
+                      width="50" height="50"
+                      style="object-fit: cover; border-radius: 4px;" />
+                  </td>
+                  <td>{{ detail.product?.nameProduct }}</td>
+                  <td class="text-center">{{ detail.quantity }}</td>
+                  <td class="text-end">{{ formatPrice(detail.price) }}</td>
+                  <td class="text-end fw-semibold">{{ formatPrice(detail.quantity * detail.price) }}</td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="footer">
+                <tr>
+                  <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
+                  <td class="text-end fw-bold text-danger">{{ formatPrice(invoice.totalPrice) }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+</div>

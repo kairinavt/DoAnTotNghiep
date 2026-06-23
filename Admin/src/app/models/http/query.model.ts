@@ -1,5 +1,6 @@
 export interface IQueryData {
-    url?: string,
-    controller: string
-    data?: any
+  controller: string;
+  url: string;
+  data?: any;
+  params?: { [key: string]: any }; // Hoặc dùng kiểu: any hoặc HttpParams
 }

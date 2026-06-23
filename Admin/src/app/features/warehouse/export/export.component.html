@@ -1,0 +1,181 @@
+<p-toast></p-toast>
+
+<div class="warehouse-page container-fluid py-3">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="page-title mb-0">Xuất kho</h3>
+      <p class="text-muted small mb-0">Xuất hàng và theo dõi lịch sử xuất kho</p>
+    </div>
+    <button class="btn btn-outline-secondary btn-sm" (click)="loadData()">
+      <i class="pi pi-refresh me-1"></i> Làm mới
+    </button>
+  </div>
+
+  <div class="row g-3">
+
+    <!-- ===== CỘT TRÁI: FORM XUẤT ===== -->
+    <div class="col-lg-4">
+      <div class="wh-card mb-3">
+        <div class="wh-card__header wh-card__header--warning">
+          <i class="pi pi-arrow-circle-up me-2"></i>Xuất hàng
+        </div>
+        <div class="wh-card__body">
+
+          <div class="mb-3">
+            <label class="wh-label">Sản phẩm <span class="text-danger">*</span></label>
+            <select class="wh-select" [(ngModel)]="selectedProductId">
+              <option value="" disabled>-- Chọn sản phẩm --</option>
+              <option *ngFor="let p of allProducts" [value]="p._id">{{ p.nameProduct }}</option>
+            </select>
+            <div class="wh-error" *ngIf="submitAttempted && !selectedProductId">
+              Vui lòng chọn sản phẩm
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="wh-label">Số lượng xuất <span class="text-danger">*</span></label>
+            <input class="wh-input" type="number" [(ngModel)]="exportQty" min="1" placeholder="0">
+            <div class="wh-error" *ngIf="submitAttempted && exportQty <= 0">
+              Vui lòng nhập số lượng hợp lệ
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="wh-label">Ghi chú</label>
+            <input class="wh-input" type="text" [(ngModel)]="note" placeholder="VD: xuất hủy do hết hạn">
+          </div>
+
+          <button class="wh-btn wh-btn--warning w-100"
+            [disabled]="!selectedProductId || exportQty <= 0"
+            (click)="doExport()">
+            <i class="pi pi-arrow-up me-2"></i>Xác nhận xuất hàng
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Tồn kho sản phẩm đang chọn (nếu có) -->
+      <div class="wh-card" *ngIf="selectedProductId">
+        <div class="wh-card__header wh-card__header--import">
+          <i class="pi pi-info-circle me-2"></i>Tồn kho hiện tại
+        </div>
+        <div class="wh-card__body">
+          <ng-container *ngFor="let item of inventory">
+            <div *ngIf="item.productId?._id === selectedProductId"
+              class="d-flex align-items-center justify-content-between">
+              <span class="small fw-semibold">{{ item.productId?.nameProduct }}</span>
+              <span class="qty-badge"
+                [class.qty-badge--danger]="getStockStatus(item) === 'danger'"
+                [class.qty-badge--warning]="getStockStatus(item) === 'warning'"
+                [class.qty-badge--success]="getStockStatus(item) === 'success'">
+                {{ item.quantity }}
+              </span>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CỘT PHẢI: BẢNG TỒN KHO + LỊCH SỬ ===== -->
+    <div class="col-lg-8">
+
+      <!-- Bảng tồn kho -->
+      <div class="wh-card mb-3">
+        <div class="wh-tabs">
+          <button class="wh-tab wh-tab--active">
+            <i class="pi pi-warehouse me-1"></i> Tồn kho hiện tại
+          </button>
+        </div>
+        <div class="wh-card__body">
+          <div class="wh-empty" *ngIf="!inventory.length">
+            <i class="pi pi-inbox"></i>
+            <p>Chưa có dữ liệu tồn kho</p>
+          </div>
+          <div class="wh-table-wrap" *ngIf="inventory.length">
+            <table class="wh-table">
+              <thead>
+                <tr>
+                  <th>Sản phẩm</th>
+                  <th class="text-center">Tồn kho</th>
+                  <th class="text-center">Ngưỡng</th>
+                  <th class="text-center">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of inventory"
+                  [class.row--danger]="item.quantity === 0"
+                  [class.row--warning]="item.quantity > 0 && item.quantity <= item.minQuantity">
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <img *ngIf="item.productId?.img"
+                        [src]="item.productId?.img"
+                        width="36" height="36"
+                        style="object-fit:cover;border-radius:8px;">
+                      <span class="fw-semibold small">{{ item.productId?.nameProduct }}</span>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <span class="qty-badge"
+                      [class.qty-badge--danger]="getStockStatus(item) === 'danger'"
+                      [class.qty-badge--warning]="getStockStatus(item) === 'warning'"
+                      [class.qty-badge--success]="getStockStatus(item) === 'success'">
+                      {{ item.quantity }}
+                    </span>
+                  </td>
+                  <td class="text-center text-muted small">{{ item.minQuantity ?? '—' }}</td>
+                  <td class="text-center">
+                    <span class="status-badge status-badge--danger" *ngIf="item.quantity === 0">Hết hàng</span>
+                    <span class="status-badge status-badge--warning"
+                      *ngIf="item.quantity > 0 && item.quantity <= item.minQuantity">Sắp hết</span>
+                    <span class="status-badge status-badge--success"
+                      *ngIf="item.quantity > item.minQuantity">Đủ hàng</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lịch sử xuất kho -->
+      <div class="wh-card">
+        <div class="wh-tabs">
+          <button class="wh-tab wh-tab--active">
+            <i class="pi pi-history me-1"></i> Lịch sử xuất kho
+          </button>
+        </div>
+        <div class="wh-card__body">
+          <div class="wh-empty" *ngIf="!stockHistory.length">
+            <i class="pi pi-clock"></i>
+            <p>Chưa có lịch sử xuất kho</p>
+          </div>
+          <div class="wh-table-wrap" *ngIf="stockHistory.length">
+            <table class="wh-table">
+              <thead>
+                <tr>
+                  <th>Thời gian</th>
+                  <th>Sản phẩm</th>
+                  <th class="text-center">Số lượng</th>
+                  <th>Ghi chú</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let h of stockHistory">
+                  <td class="text-muted small" style="white-space:nowrap">
+                    {{ h.date | date: 'dd/MM/yyyy HH:mm' }}
+                  </td>
+                  <td class="fw-semibold small">{{ h.productId?.nameProduct }}</td>
+                  <td class="text-center fw-bold text-danger">{{ h.quantity }}</td>
+                  <td class="text-muted small">{{ h.note || '—' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

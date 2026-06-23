@@ -3,22 +3,38 @@ const {ProductModel} = require('../models/product/product');
 class ProductService {
     constructor() {}
 
-    async NewProduct( nameProduct, price, img,quantity,descrip,cateid,inclueId) {
-        if (price < 1000) {
-            throw new Error('Giá sản phẩm phải từ 1.000đ trở lên');
-        }
-        try {
-            const product = new ProductModel({
-                 nameProduct, price, img,quantity,descrip,cateid,inclueId
-            });
-            await product.save();
-            return true;
-        }
-        catch(e) {
-            return e;
-        }
-        return false;
+    // async NewProduct( nameProduct, price, img,quantity,descrip,cateid,inclueId) {
+    //     if (price < 1000) {
+    //         throw new Error('Giá sản phẩm phải từ 1.000đ trở lên');
+    //     }
+    //     try {
+    //         const product = new ProductModel({
+    //              nameProduct, price, img,quantity,descrip,cateid,inclueId
+    //         });
+    //         await product.save();
+    //         return true;
+    //     }
+    //     catch(e) {
+    //         return e;
+    //     }
+    //     return false;
+    // }
+
+    async NewProduct(nameProduct, price, img, descrip, cateid, inclueId) {
+    if (price < 1000) {
+        throw new Error('Giá sản phẩm phải từ 1.000đ trở lên');
     }
+    try {
+        const product = new ProductModel({
+            nameProduct, price, img, descrip, cateid, inclueId
+        });
+        await product.save();
+        return product; // trả product để FE lấy _id tạo inventory nếu cần
+    }
+    catch(e) {
+        return e;
+    }
+}
 
     async FindProduct(nameProduct, res) {
         try {
@@ -143,4 +159,5 @@ class ProductService {
         }
     }
 }
+
 module.exports = ProductService;
