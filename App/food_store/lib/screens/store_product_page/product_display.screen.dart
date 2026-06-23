@@ -20,13 +20,16 @@ class _ProductDisplayScreenState extends State<ProductDisplayScreen> {
   final ProductService _productService = ProductService();
   final DatabaseHelper _databaseHelper = DatabaseHelper();
 
+  // Hằng số giới hạn đơn hàng (3 triệu đồng)
+  static const double maxOrderLimit = 3000000;
+
   late bool liked;
   late ProductModel product;
   late double originalPrice;
   int quantity = 1;
   List<ProductModel> includeProducts = [];
 
-  // 1. Biến lưu danh sách các món ăn kèm được chọn
+  // Biến lưu danh sách các món ăn kèm được chọn
   List<ProductModel> selectedExtras = [];
 
   @override
@@ -39,13 +42,18 @@ class _ProductDisplayScreenState extends State<ProductDisplayScreen> {
     if (includeProducts.isEmpty) _getIncludeProduct();
   }
 
-  void _calculateTotalPrice() {
+  // Hàm bổ trợ tính tổng giá tiền của 1 sản phẩm + các món kèm (chưa nhân quantity)
+  double _getSingleProductWithExtrasPrice() {
     double extrasTotalPrice = 0;
     for (var extra in selectedExtras) {
       extrasTotalPrice += extra.price;
     }
+    return originalPrice + extrasTotalPrice;
+  }
+
+  void _calculateTotalPrice() {
     setState(() {
-      product.price = originalPrice + extrasTotalPrice; // ← bỏ * quantity
+      product.price = _getSingleProductWithExtrasPrice();
     });
   }
 
@@ -84,7 +92,6 @@ class _ProductDisplayScreenState extends State<ProductDisplayScreen> {
   }
 
   Future<void> _addToCart() async {
-    // Tên sản phẩm gửi vào giỏ hàng sẽ kèm theo tên các món chọn thêm cho rõ ràng
     String finalName = product.nameProduct;
     if (selectedExtras.isNotEmpty) {
       finalName += " (${selectedExtras.map((e) => e.nameProduct).join(', ')})";
@@ -242,19 +249,37 @@ class _ProductDisplayScreenState extends State<ProductDisplayScreen> {
                     // Danh sách lựa chọn hiện đại giống App đặt đồ ăn lớn
                     Column(
                       children: includeProducts.map((item) {
-                        // Kiểm tra xem món ăn kèm này đã được chọn chưa
                         final isSelected = selectedExtras.contains(item);
 
                         return InkWell(
                           onTap: () {
                             setState(() {
                               if (isSelected) {
-                                selectedExtras.remove(item); // Bỏ chọn
+                                selectedExtras.remove(item);
+                                _calculateTotalPrice();
                               } else {
-                                selectedExtras.add(item); // Chọn thêm
+                                // Kiểm tra xem nếu thêm món kèm này thì tổng tiền (đã nhân quantity) có vượt 3 triệu không
+                                double temporaryExtrasPrice = 0;
+                                for (var extra in selectedExtras) {
+                                  temporaryExtrasPrice += extra.price;
+                                }
+                                temporaryExtrasPrice +=
+                                    item.price; // Thử cộng thêm món mới
+
+                                double estimatedTotalPrice =
+                                    (originalPrice + temporaryExtrasPrice) *
+                                        quantity;
+
+                                if (estimatedTotalPrice > maxOrderLimit) {
+                                  _showSnackBar(
+                                      'Tổng giá trị món hàng không được vượt quá 3,000,000 đ');
+                                  return; // Chặn không cho chọn thêm
+                                }
+
+                                selectedExtras.add(item);
+                                _calculateTotalPrice();
                               }
                             });
-                            _calculateTotalPrice(); // Tính lại tiền liền
                           },
                           borderRadius: BorderRadius.circular(12),
                           child: Padding(
@@ -262,7 +287,6 @@ class _ProductDisplayScreenState extends State<ProductDisplayScreen> {
                                 vertical: 10.0, horizontal: 4.0),
                             child: Row(
                               children: [
-                                // Ô Checkbox tròn phong cách hiện đại
                                 Icon(
                                   isSelected
                                       ? Icons.check_circle
@@ -287,7 +311,6 @@ class _ProductDisplayScreenState extends State<ProductDisplayScreen> {
                                     ),
                                   ),
                                 ),
-                                // Hiển thị giá cộng thêm của món đó (+ 15,000đ)
                                 Text(
                                   '+ ${getFormattedPrice(item.price)} đ',
                                   style: TextStyle(
@@ -333,7 +356,7 @@ class _ProductDisplayScreenState extends State<ProductDisplayScreen> {
               if (quantity > 1) {
                 setState(() {
                   quantity--;
-                  _calculateTotalPrice(); // Tính lại tiền theo số lượng mới
+                  _calculateTotalPrice();
                 });
               }
             },
@@ -349,9 +372,19 @@ class _ProductDisplayScreenState extends State<ProductDisplayScreen> {
             icon: const Icon(Icons.add, size: 18, color: Colors.black87),
             onPressed: () {
               if (quantity < (product.quantity)) {
+                // Kiểm tra trước xem nếu tăng số lượng thì tổng tiền có vượt quá 3 triệu không
+                double nextTotalPrice =
+                    _getSingleProductWithExtrasPrice() * (quantity + 1);
+
+                if (nextTotalPrice > maxOrderLimit) {
+                  _showSnackBar(
+                      'Tổng giá trị món hàng không được vượt quá 3,000,000 đ');
+                  return; // Chặn không cho tăng số lượng
+                }
+
                 setState(() {
                   quantity++;
-                  _calculateTotalPrice(); // Tính lại tiền theo số lượng mới
+                  _calculateTotalPrice();
                 });
               }
             },
@@ -385,7 +418,7 @@ class _ProductDisplayScreenState extends State<ProductDisplayScreen> {
                     style: TextStyle(color: Colors.grey, fontSize: 14)),
                 const SizedBox(height: 4),
                 Text(
-                  '${getFormattedPrice(product.price * quantity)} đ', // ← thêm * quantity
+                  '${getFormattedPrice(product.price * quantity)} đ',
                   style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,

@@ -6,7 +6,7 @@ class HttpService {
   HttpService() {}
 
   // String headerUrl = 'http://10.0.2.2:3000/api/'; // Emulator
-  String headerUrl = 'http://192.168.100.85:3000/api/'; // Physic device
+  String headerUrl = 'http://192.168.100.115:3000/api/'; // Physic device
   var dio = Dio();
 
   // ================= GET METHOD =================
@@ -35,7 +35,6 @@ class HttpService {
       String path, IBaseModel model,
       {IBaseModel? returnType}) async {
     try {
-      // In ra chính xác URL đang được gọi và dữ liệu gửi đi để bạn debug
       print("🚀 [DIO POST] Đang gọi URL: $headerUrl$path");
       print("📦 [DIO DATA GỬI ĐI]: ${model.toJson()}");
 
@@ -54,7 +53,6 @@ class HttpService {
     }
   }
 
-  // ================= PARSER JSON CHUẨN =================
   dynamic _jsonBodyParser<TResultType>(IBaseModel model, dynamic jsonBody,
       {IBaseModel? returnType}) {
     if (jsonBody is List) {
@@ -88,7 +86,6 @@ class HttpService {
     }
   }
 
-  // ================= HÀM IN LỖI CHI TIẾT =================
   void _handleDioError(DioException error, String fullUrl) {
     print("--------------------------------------------------");
     if (error.response != null) {

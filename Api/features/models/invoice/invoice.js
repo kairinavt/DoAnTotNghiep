@@ -1,6 +1,5 @@
 const { Schema, model } = require('mongoose');
 
-// Define the DetailInvoiceSchema as a sub-schema
 const DetailInvoiceSchema = new Schema({
     productId: { type: String, required: true },
     product: { type: Schema.Types.ObjectId, required: true, ref: 'Product' },
@@ -10,16 +9,16 @@ const DetailInvoiceSchema = new Schema({
     date: { type: String, required: true },
 });
 const DetailInvoiceModel = model('DetailInvoice', DetailInvoiceSchema);
-// module.exports = { DetailInvoiceModel };
-// Define the InvoiceSchema
+
 const InvoiceSchema = new Schema({
     nameInvoice: { type: String, required: true },
     details: [{ type: Schema.Types.ObjectId, ref: 'DetailInvoice' }],
     accountId: { type: String, required: true },
-    account: { type: Schema.Types.ObjectId, ref: 'Accounts' }
+    account: { type: Schema.Types.ObjectId, ref: 'Accounts' },
+    status: { type: String, enum: ['active', 'cancelled', 'completed'], default: 'active' },
+    cancelReason: { type: String },
+    completedAt: { type: Date }
 });
-
-
 
 const InvoiceModel = model('Invoice', InvoiceSchema);
 module.exports = { InvoiceModel, DetailInvoiceModel };

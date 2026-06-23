@@ -5,6 +5,7 @@ import { ButtonModule } from 'primeng/button';
 import { SidebarModule } from 'primeng/sidebar';
 import { TableModule } from 'primeng/table';
 import { TooltipModule } from 'primeng/tooltip';
+import { ChartModule } from 'primeng/chart';
 import { FeatureRoutingModule } from './feature.routes';
 import { ProductComponent } from './product/product.component';
 import { NgbDropdownModule, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
@@ -21,6 +22,11 @@ import { InvoiceComponent } from './invoice/invoice.component';
 import { AccountComponent } from './account/account.component';
 import { AccountEditComponent } from './account/account-edit/account-edit.component';
 import { ImageModule } from 'primeng/image';
+import { WarehouseComponent } from './warehouse/warehouse.component';
+import { ExportComponent } from './warehouse/export/export.component';
+import { OrderComponent } from './order/order.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { StatisticsComponent } from './statistics/statistics.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +34,12 @@ import { ImageModule } from 'primeng/image';
     ProductEditComponent,
     InvoiceComponent,
     AccountComponent,
-    AccountEditComponent
+    AccountEditComponent,
+    WarehouseComponent,
+    ExportComponent,
+    OrderComponent,
+    DashboardComponent,
+    StatisticsComponent
   ],
   imports: [
     CommonModule,
@@ -38,6 +49,7 @@ import { ImageModule } from 'primeng/image';
     TableModule,
     ButtonModule,
     TooltipModule,
+    ChartModule,
     NgbDropdownModule,
     NgbModalModule,
     FormlyModule.forChild({}),
@@ -48,7 +60,7 @@ import { ImageModule } from 'primeng/image';
     OverlayPanelModule,
     InputTextModule,
     ImageModule
-],
+  ],
   providers: [MessageService, ConfirmationService, ConfirmationDialogService]
 })
 export class FeatureModule { }

@@ -1,0 +1,21 @@
+.nav-tabs .nav-link {
+  color: #666;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 10px 20px;
+  font-weight: 500;
+  &:hover { color: #667eea; border-bottom-color: #667eea; }
+  &.active { color: #667eea; border-bottom-color: #667eea; background: none; }
+}
+
+.rank-badge {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: #eee;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.75rem;
+  &.rank-gold   { background: #ffd700; color: #7a5800; }
+  &.rank-silver { background: #c0c0c0; color: #555; }
+  &.rank-bronze { background: #cd7f32; color: #fff; }
+}
+
+.bg-primary-soft { background: #e8f0fe; }

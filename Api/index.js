@@ -7,7 +7,7 @@ const productRoutes = require('./features/routes/productRoutes');
 const categoryRoutes = require('./features/routes/categoryRoutes');
 const invoiceRoutes = require('./features/routes/invoiceRoutes.js');
 const detailInvoiceRoutes = require('./features/routes/detailInvoiceRoutes.js');
-
+const warehouseRoute = require('./features/routes/warehouseRoute');
 
 app.use(bodyParser.urlencoded({
     extended: true
@@ -20,6 +20,8 @@ app.use('/api/Product', productRoutes);
 app.use('/api/Categories', categoryRoutes);
 app.use('/api/Invoice', invoiceRoutes);
 app.use('/api/DetailInvoice', detailInvoiceRoutes);
+app.use('/api/Warehouse', require('./features/routes/warehouseRoute'));
+
 
 app.listen(port, () => {
     console.log(`Server is listening on port: http://localhost:${port}`);

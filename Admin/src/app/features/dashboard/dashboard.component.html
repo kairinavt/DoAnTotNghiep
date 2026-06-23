@@ -1,0 +1,252 @@
+<p-toast></p-toast>
+
+<div class="content container-fluid py-3">
+  <h3 class="page-title mb-4">Tổng quan</h3>
+
+  <!-- Loading -->
+  <div class="text-center py-5" *ngIf="loading">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem;"></i>
+    <p class="mt-2 text-muted">Đang tải dữ liệu...</p>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- ===== THẺ THỐNG KÊ ===== -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="card stat-card h-100 border-0 shadow-sm">
+          <div class="card-body d-flex align-items-center gap-3">
+            <div class="stat-icon bg-primary-soft">
+              <i class="pi pi-dollar text-primary"></i>
+            </div>
+            <div>
+              <div class="stat-label">Tổng doanh thu</div>
+              <div class="stat-value text-primary">{{ formatPrice(totalRevenue) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card stat-card h-100 border-0 shadow-sm">
+          <div class="card-body d-flex align-items-center gap-3">
+            <div class="stat-icon bg-success-soft">
+              <i class="pi pi-shopping-cart text-success"></i>
+            </div>
+            <div>
+              <div class="stat-label">Tổng đơn hàng</div>
+              <div class="stat-value text-success">{{ totalOrders }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card stat-card h-100 border-0 shadow-sm">
+          <div class="card-body d-flex align-items-center gap-3">
+            <div class="stat-icon bg-danger-soft">
+              <i class="pi pi-times-circle text-danger"></i>
+            </div>
+            <div>
+              <div class="stat-label">Đơn đã hủy</div>
+              <div class="stat-value text-danger">{{ cancelledOrders }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card stat-card h-100 border-0 shadow-sm">
+          <div class="card-body d-flex align-items-center gap-3">
+            <div class="stat-icon bg-warning-soft">
+              <i class="pi pi-exclamation-triangle text-warning"></i>
+            </div>
+            <div>
+              <div class="stat-label">Sản phẩm sắp hết</div>
+              <div class="stat-value text-warning">{{ lowStockCount }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+
+      <!-- ===== BIỂU ĐỒ DOANH THU 7 NGÀY ===== -->
+      <div class="col-md-8">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="card-title fw-semibold mb-3">Doanh thu 7 ngày gần nhất</h6>
+            <div class="chart-container" style="height: 220px; display: flex; align-items: flex-end; gap: 8px;">
+              <ng-container *ngFor="let d of revenueChartData">
+                <div class="d-flex flex-column align-items-center flex-fill">
+                  <span class="chart-value" *ngIf="d.revenue > 0">
+                    {{ d.revenue >= 1000000 ? (d.revenue / 1000000 | number:'1.1-1') + 'M' : (d.revenue / 1000 | number:'1.0-0') + 'K' }}
+                  </span>
+                  <div class="chart-bar"
+  [style.height.px]="maxRevenue() > 0 ? (d.revenue / maxRevenue() * 200) : 4"
+  [class.chart-bar-active]="d.revenue > 0">
+</div>
+                  <span class="chart-label">{{ d.date }}</span>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TỶ LỆ ĐƠN HÀNG ===== -->
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="card-title fw-semibold mb-3">Tỷ lệ đơn hàng</h6>
+            <div *ngIf="totalOrders > 0">
+              <div class="mb-2">
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="small">Hoạt động</span>
+                  <span class="small fw-semibold text-success">
+                    {{ totalOrders - cancelledOrders }} ({{ ((totalOrders - cancelledOrders) / totalOrders * 100) | number:'1.0-0' }}%)
+                  </span>
+                </div>
+                <div class="progress" style="height: 10px;">
+                  <div class="progress-bar bg-success"
+                    [style.width.%]="(totalOrders - cancelledOrders) / totalOrders * 100">
+                  </div>
+                </div>
+              </div>
+              <div class="mb-2">
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="small">Đã hủy</span>
+                  <span class="small fw-semibold text-danger">
+                    {{ cancelledOrders }} ({{ (cancelledOrders / totalOrders * 100) | number:'1.0-0' }}%)
+                  </span>
+                </div>
+                <div class="progress" style="height: 10px;">
+                  <div class="progress-bar bg-danger"
+                    [style.width.%]="cancelledOrders / totalOrders * 100">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="totalOrders === 0" class="text-center text-muted py-3">
+              Chưa có đơn hàng
+            </div>
+
+            <hr>
+            <h6 class="fw-semibold mb-2">Tổng sản phẩm</h6>
+            <div class="d-flex align-items-center gap-2">
+              <i class="pi pi-box text-primary fs-4"></i>
+              <span class="fs-4 fw-bold">{{ totalProducts }}</span>
+              <span class="text-muted small">sản phẩm</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+
+      <!-- ===== TOP SẢN PHẨM BÁN CHẠY ===== -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h6 class="card-title fw-semibold mb-3">
+              <i class="pi pi-star-fill text-warning me-2"></i>Top sản phẩm bán chạy
+            </h6>
+            <div *ngIf="topProducts.length === 0" class="text-center text-muted py-3">
+              Chưa có dữ liệu
+            </div>
+            <div class="top-product-item d-flex align-items-center gap-3 mb-3"
+              *ngFor="let p of topProducts; let i = index">
+              <span class="rank-badge" [class.rank-gold]="i===0" [class.rank-silver]="i===1" [class.rank-bronze]="i===2">
+                {{ i + 1 }}
+              </span>
+              <img [src]="p.img || 'assets/images/placeholder.png'" [alt]="p.name"
+                width="44" height="44" style="object-fit:cover; border-radius:8px;">
+              <div class="flex-fill">
+                <div class="fw-semibold small">{{ p.name }}</div>
+                <div class="text-muted" style="font-size:0.8rem;">{{ p.totalQty }} món · {{ formatPrice(p.totalRevenue) }}</div>
+              </div>
+              <div class="text-end">
+                <span class="badge bg-primary-soft text-primary">x{{ p.totalQty }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TỒN KHO THẤP ===== -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h6 class="card-title fw-semibold mb-3">
+              <i class="pi pi-exclamation-triangle text-warning me-2"></i>Sản phẩm sắp hết kho
+            </h6>
+            <div *ngIf="lowStockItems.length === 0" class="text-center text-muted py-3">
+              Tất cả sản phẩm còn đủ hàng 🎉
+            </div>
+            <table class="table table-sm align-middle mb-0" *ngIf="lowStockItems.length">
+              <thead class="table-light">
+                <tr>
+                  <th>Sản phẩm</th>
+                  <th class="text-center">Tồn kho</th>
+                  <th class="text-center">Ngưỡng</th>
+                  <th class="text-center">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of lowStockItems">
+                  <td>{{ item.productId?.nameProduct }}</td>
+                  <td class="text-center fw-semibold">{{ item.quantity }}</td>
+                  <td class="text-center text-muted">{{ item.minQuantity }}</td>
+                  <td class="text-center">
+                    <span class="badge bg-danger" *ngIf="item.quantity === 0">Hết hàng</span>
+                    <span class="badge bg-warning text-dark" *ngIf="item.quantity > 0">Sắp hết</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ĐƠN HÀNG GẦN ĐÂY ===== -->
+      <div class="col-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h6 class="card-title fw-semibold mb-3">
+              <i class="pi pi-clock text-primary me-2"></i>Đơn hàng gần đây
+            </h6>
+            <div *ngIf="recentOrders.length === 0" class="text-center text-muted py-3">
+              Chưa có đơn hàng
+            </div>
+            <table class="table table-hover table-sm align-middle mb-0" *ngIf="recentOrders.length">
+              <thead class="table-light">
+                <tr>
+                  <th>Mã đơn</th>
+                  <th>Khách hàng</th>
+                  <th>Ngày đặt</th>
+                  <th class="text-center">Số món</th>
+                  <th class="text-end">Tổng tiền</th>
+                  <th class="text-center">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let inv of recentOrders">
+                  <td class="fw-semibold">{{ inv.nameInvoice }}</td>
+                  <td>{{ inv.account?.name || '—' }}</td>
+                  <td>{{ inv.dateDisplay || '—' }}</td>
+                  <td class="text-center">{{ inv.totalQty ?? 0 }}</td>
+                  <td class="text-end">{{ formatPrice(inv.totalPrice ?? 0) }}</td>
+                  <td class="text-center">
+                    <span class="badge" [class]="getOrderStatusClass(inv)">
+                      {{ getOrderStatus(inv) }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+</div>

@@ -176,7 +176,7 @@ class _StoreMainScreenState extends State<StoreMainScreen>
                       _buildCategoryBar(),
                       _buildSectionSliver('❤️ Đã thích', _favoriteProducts,
                           seeAll: true, onSeeAll: () {
-                        // Điều hướng dạng Push một trang độc lập hợp lý cho nút "Xem tất cả"
+                      
                         Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -238,7 +238,7 @@ class _StoreMainScreenState extends State<StoreMainScreen>
                           color: kTextGrey,
                           fontSize: 13,
                           fontWeight: FontWeight.w500)),
-                  Text('CANTEEN YUMMY DELI',
+                  Text('CĂN TIN YUMMY DELI',
                       style: TextStyle(
                           color: kTextDark,
                           fontSize: 17,
@@ -247,7 +247,7 @@ class _StoreMainScreenState extends State<StoreMainScreen>
                 ],
               ),
             ),
-            // Cart badge (Đã được tối ưu - để xem thông báo hoặc lịch sử thay vì đẩy trùng lặp màn Cart)
+            
             Container(
               width: 44,
               height: 44,

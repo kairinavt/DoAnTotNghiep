@@ -1,0 +1,200 @@
+<p-toast></p-toast>
+
+<div class="warehouse-page container-fluid py-3">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="page-title mb-0">Quản lý kho</h3>
+      <p class="text-muted small mb-0">Nhập hàng, theo dõi tồn kho và lịch sử giao dịch</p>
+    </div>
+    <button class="btn btn-outline-secondary btn-sm" (click)="loadWarehouseData()">
+      <i class="pi pi-refresh me-1"></i> Làm mới
+    </button>
+  </div>
+
+  <!-- Thẻ cảnh báo sắp hết hàng -->
+  <div class="alert-card mb-4" *ngIf="lowStock && lowStock.length">
+    <div class="alert-card__icon">
+      <i class="pi pi-exclamation-triangle"></i>
+    </div>
+    <div class="alert-card__body">
+      <div class="alert-card__title">Cảnh báo tồn kho thấp — {{ lowStock.length }} sản phẩm</div>
+      <div class="alert-card__items">
+        <span class="stock-pill" *ngFor="let item of lowStock">
+          {{ item.productId?.nameProduct }}
+          <span class="stock-pill__qty">{{ item.quantity }}</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+
+    <!-- ===== CỘT TRÁI: FORM ===== -->
+    <div class="col-lg-4">
+
+      <!-- Form nhập hàng -->
+      <div class="wh-card mb-3">
+        <div class="wh-card__header wh-card__header--import">
+          <i class="pi pi-arrow-circle-down me-2"></i>Nhập hàng
+        </div>
+        <div class="wh-card__body">
+          <div class="mb-3">
+            <label class="wh-label">Sản phẩm <span class="text-danger">*</span></label>
+            <select class="wh-select" [(ngModel)]="selectedProductId">
+              <option value="" disabled>-- Chọn sản phẩm --</option>
+              <option *ngFor="let p of allProducts" [value]="p._id">{{ p.nameProduct }}</option>
+            </select>
+            <div class="wh-error" *ngIf="submitAttempted && !selectedProductId">
+              Vui lòng chọn sản phẩm
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="wh-label">Ghi chú</label>
+            <input class="wh-input" type="text" [(ngModel)]="note" placeholder="VD: nhập từ NCC A">
+          </div>
+          <div class="mb-3">
+            <label class="wh-label">Số lượng nhập</label>
+            <input class="wh-input" type="number" [(ngModel)]="importQty" min="0" placeholder="0">
+          </div>
+          <button class="wh-btn wh-btn--import w-100"
+            [disabled]="!selectedProductId || importQty <= 0"
+            (click)="doImport()">
+            <i class="pi pi-arrow-down me-2"></i>Xác nhận nhập hàng
+          </button>
+        </div>
+      </div>
+
+      <!-- Form ngưỡng cảnh báo -->
+      <div class="wh-card">
+        <div class="wh-card__header wh-card__header--warning">
+          <i class="pi pi-bell me-2"></i>Ngưỡng cảnh báo
+        </div>
+        <div class="wh-card__body">
+          <div class="mb-3">
+            <label class="wh-label">Sản phẩm</label>
+            <select class="wh-select" [(ngModel)]="minQtyProductId">
+              <option value="" disabled>-- Chọn sản phẩm --</option>
+              <option *ngFor="let p of allProducts" [value]="p._id">{{ p.nameProduct }}</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="wh-label">Ngưỡng tối thiểu</label>
+            <input class="wh-input" type="number" [(ngModel)]="minQtyValue" min="0" placeholder="VD: 10">
+          </div>
+          <button class="wh-btn wh-btn--warning w-100"
+            [disabled]="!minQtyProductId || minQtyValue == null || minQtyValue < 0"
+            (click)="doSetMinQty()">
+            <i class="pi pi-save me-2"></i>Lưu ngưỡng
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== CỘT PHẢI: BẢNG ===== -->
+    <div class="col-lg-8">
+      <div class="wh-card h-100">
+
+        <!-- Tab toggle -->
+        <div class="wh-tabs">
+          <button class="wh-tab" [class.wh-tab--active]="!showHistory" (click)="showHistory = false">
+            <i class="pi pi-warehouse me-1"></i> Tồn kho
+          </button>
+          <button class="wh-tab" [class.wh-tab--active]="showHistory" (click)="toggleHistory()">
+            <i class="pi pi-history me-1"></i> Lịch sử
+          </button>
+        </div>
+
+        <!-- Bảng tồn kho -->
+        <div class="wh-card__body" *ngIf="!showHistory">
+          <div class="wh-empty" *ngIf="!inventory || !inventory.length">
+            <i class="pi pi-inbox"></i>
+            <p>Chưa có dữ liệu tồn kho</p>
+          </div>
+          <div class="wh-table-wrap" *ngIf="inventory && inventory.length">
+            <table class="wh-table">
+              <thead>
+                <tr>
+                  <th>Sản phẩm</th>
+                  <th class="text-center">Tồn kho</th>
+                  <th class="text-center">Ngưỡng</th>
+                  <th class="text-center">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of inventory"
+                  [class.row--danger]="item.quantity === 0"
+                  [class.row--warning]="item.quantity > 0 && item.quantity <= item.minQuantity">
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <img *ngIf="item.productId?.img"
+                        [src]="item.productId?.img"
+                        width="36" height="36"
+                        style="object-fit:cover;border-radius:8px;">
+                      <span class="fw-semibold small">{{ item.productId?.nameProduct }}</span>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <span class="qty-badge" [class.qty-badge--danger]="item.quantity === 0"
+                      [class.qty-badge--warning]="item.quantity > 0 && item.quantity <= item.minQuantity"
+                      [class.qty-badge--success]="item.quantity > item.minQuantity">
+                      {{ item.quantity }}
+                    </span>
+                  </td>
+                  <td class="text-center text-muted small">{{ item.minQuantity ?? '—' }}</td>
+                  <td class="text-center">
+                    <span class="status-badge status-badge--danger" *ngIf="item.quantity === 0">Hết hàng</span>
+                    <span class="status-badge status-badge--warning" *ngIf="item.quantity > 0 && item.quantity <= item.minQuantity">Sắp hết</span>
+                    <span class="status-badge status-badge--success" *ngIf="item.quantity > item.minQuantity">Đủ hàng</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Bảng lịch sử -->
+        <div class="wh-card__body" *ngIf="showHistory">
+          <div class="wh-empty" *ngIf="!stockHistory || !stockHistory.length">
+            <i class="pi pi-clock"></i>
+            <p>Chưa có lịch sử giao dịch</p>
+          </div>
+          <div class="wh-table-wrap" *ngIf="stockHistory && stockHistory.length">
+            <table class="wh-table">
+              <thead>
+                <tr>
+                  <th>Thời gian</th>
+                  <th>Sản phẩm</th>
+                  <th class="text-center">Loại</th>
+                  <th class="text-center">Số lượng</th>
+                  <th>Ghi chú</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let h of stockHistory">
+                  <td class="text-muted small" style="white-space:nowrap">
+                    {{ h.date | date: 'dd/MM/yyyy HH:mm' }}
+                  </td>
+                  <td class="fw-semibold small">{{ h.productId?.nameProduct }}</td>
+                  <td class="text-center">
+                    <span class="type-badge type-badge--import" *ngIf="h.type === 'import'">
+                      <i class="pi pi-arrow-down me-1"></i>Nhập
+                    </span>
+                    <span class="type-badge type-badge--export" *ngIf="h.type === 'export'">
+                      <i class="pi pi-arrow-up me-1"></i>Xuất
+                    </span>
+                  </td>
+                  <td class="text-center fw-bold">{{ h.quantity }}</td>
+                  <td class="text-muted small">{{ h.note || '—' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

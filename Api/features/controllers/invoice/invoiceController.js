@@ -5,30 +5,39 @@ class InvoiceController {
     constructor() {}
 
     async NewInvoice(req, res) {
-        return await invoiceService.NewInvoice( req.nameInvoice,req.details,req.productId,req.quantity,req.price,req.address,req.date,req.accountId);
+        const { nameInvoice, details, productId, quantity, price, address, date, accountId } = req;
+        return await invoiceService.NewInvoice(nameInvoice, details, productId, quantity, price, address, date, accountId);
     }
 
     async FindInvoice(req, res) {
-        return await invoiceService.FindInvoice(req.accountId, res);
+        const { accountId } = req;
+        return await invoiceService.FindInvoice(accountId);
     }
 
-   
-
     async GetInvoiceById(req, res) {
-        const { id } = req.params;
-        return  await invoiceService.GetInvoiceById(id);
-        
+        return await invoiceService.GetInvoiceById(req.params.id);
     }
 
     async GetAllInvoices(req, res) {
         return await invoiceService.GetAllInvoices();
-        
     }
 
     async GetInvoiceByAccountId(req, res) {
-        const { accountId } = req.params;
-        return  await invoiceService.GetInvoiceByAccountId(accountId);
-        
+        return await invoiceService.GetInvoiceByAccountId(req.params.accountId);
+    }
+
+    // Hủy đơn hàng
+    async CancelInvoice(req, res) {
+        const { id } = req.params;
+        const { cancelReason } = req.body;
+        return await invoiceService.CancelInvoice(id, cancelReason);
+    }
+
+    // Hoàn thành đơn hàng
+    async CompleteInvoice(req, res) {
+        const { id } = req.params;
+        return await invoiceService.CompleteInvoice(id);
     }
 }
+
 module.exports = InvoiceController;
